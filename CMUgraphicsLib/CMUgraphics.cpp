@@ -575,12 +575,30 @@ keytype window::GetKeyState(char & cKey) {
 }
 
 void window::SetUserClick(int x, int y){
-	xtoret = x;
-	ytoret = y;
+	xtoret.push(x);
+	ytoret.push(y);
+	windowinput wi(hwndWindow, this);
+	wi.SetMouseCoord(hwndWindow, x, y);
+	wi.SetMouseState(hwndWindow, button::LEFT_BUTTON, buttonstate::BUTTON_DOWN, x, y);
+	bsLeft = buttonstate::BUTTON_DOWN;
 }
 clicktype window::WaitMouseClick(int &iX, int &iY) {
-	iX = xtoret;
-	iY = ytoret;
+	if (!xtoret.empty()) {
+		iX = xtoret.front();
+		xtoret.pop();
+	}
+	else
+		iX = 0;
+	if (!ytoret.empty()){
+		iY = ytoret.front();
+		ytoret.pop();
+	}
+	else
+		iY = 0;
+	bsLeft = buttonstate::BUTTON_DOWN;
+	windowinput wi(hwndWindow, this);
+	wi.SetMouseCoord(hwndWindow, iX, iY);
+	wi.SetMouseState(hwndWindow, button::LEFT_BUTTON, buttonstate::BUTTON_DOWN, iX, iY);
 	return clicktype::LEFT_CLICK;
 	mqueuenode* mqueTmp;
     clicktype ctTmp;

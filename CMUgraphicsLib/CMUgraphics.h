@@ -7,6 +7,7 @@ This file was last modified on 05.16.1999
 #define CMUGRAPHICS_H
 
 #include <string>
+#include <queue>
 
 #ifndef WINDOWS_H
   #define WINDOWS_H
@@ -187,7 +188,8 @@ class window {
     // (see the clicktype enum in mousequeue.h)
  	clicktype GetMouseClick(int &iX, int &iY);
 
-	int xtoret, ytoret;
+	queue<int> xtoret, ytoret;
+	
 	void SetUserClick(int x, int y);
     // WaitMouseClick works the same as above but will only return 
     // if there is a mouse click event in the queue, otherwise
