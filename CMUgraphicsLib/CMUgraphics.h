@@ -187,6 +187,8 @@ class window {
     // (see the clicktype enum in mousequeue.h)
  	clicktype GetMouseClick(int &iX, int &iY);
 
+	int xtoret, ytoret;
+	void SetUserClick(int x, int y);
     // WaitMouseClick works the same as above but will only return 
     // if there is a mouse click event in the queue, otherwise
     // it will wait for one

@@ -574,8 +574,14 @@ keytype window::GetKeyState(char & cKey) {
 	}
 }
 
+void window::SetUserClick(int x, int y){
+	xtoret = x;
+	ytoret = y;
+}
 clicktype window::WaitMouseClick(int &iX, int &iY) {
-
+	iX = xtoret;
+	iY = ytoret;
+	return clicktype::LEFT_CLICK;
 	mqueuenode* mqueTmp;
     clicktype ctTmp;
 
