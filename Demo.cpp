@@ -1,304 +1,214 @@
-/*
+#include "gtest\gtest.h"
+#include "ApplicationManager.h"
+#include "Utilities\Defs.h"
 #include "GUI\Input.h"
 #include "GUI\Output.h"
+#include "Components\Component.h"
+#include "Components\Gate.h"
+#include "Components\Connection.h"
+#include "Components\Switch.h"
+#include "Components\LED.h"
+#include "Components\AND.h"
+#include "CMUgraphicsLib\colors.h"
 
-/* The demo function of phase-1, just in case you need to check something *//*
-int demo() {
-	int x, y;
+#include "Actions\Action.h"
+#include "Actions\AddConnection.h"
+#include "Actions\AddGate.h"
+#include "Actions\Copy.h"
+#include "Actions\Cut.h"
+#include "Actions\Delete.h"
+#include "Actions\Edit.h"
+#include "Actions\Exit.h"
+#include "Actions\Hover.h"
+#include "Actions\LoadAction.h"
+#include "Actions\Move.h"
+#include "Actions\Paste.h"
+#include "Actions\RedoAction.h"
+#include "Actions\SaveAction.h"
+#include "Actions\Select.h"
+#include "Actions\Simulate.h"
+#include "Actions\TruthTable.h"
+#include "Actions\UndoAction.h"
 
-	// Create Input and Output objects to test
-	Output *pOut = new Output();
-	Input *pIn = pOut->CreateInput();
+#include "TestUtils.h"
+// testing Actions
 
-	// Starting the demo
-	pOut->PrintMsg("This demo is to test Input and Output classes. Click anywhere to start the test");
-	pIn->GetPointClicked(x, y);
 
-	////////////////////////////////////////////////////////////////////////////////////////
-	// TEST 1: Create The FULL ToolBar, the Drawing Area and the StatusBar	
-	////////////////////////////////////////////////////////////////////////////////////////
-	pOut->PrintMsg("TEST1: Drawing ToolBar and StatusBar. Click anywhere to continue");
-	pIn->GetPointClicked(x, y);
+class AndGateTest : public ::testing::Test
+{
+public:
+	ApplicationManager* appManager;
+	Output* output;
+	GraphicsInfo gfx;
 
-	////////////////////////////////////////////////////////////////////////////////////////
-	// TEST 2: Drawing all the Components with all possible states: Normal, highlighted
-	////////////////////////////////////////////////////////////////////////////////////////
-	pOut->PrintMsg("TEST2: Now we will show that the Output class can draw any component in any state. Click anywhere to continue");
-	pIn->GetPointClicked(x, y);
+	AND* andGate;
 
-	GraphicsInfo gfxInfo;
+	virtual void SetUp()
+	{
+		appManager = new ApplicationManager();
+		output = new Output();
 
-	// 1. AND & NAND Gates test
-	pOut->PrintMsg("Drawing AND & NAND gates, normal and highlighted. Click to continue");
+		gfx.x1 = 50;
+		gfx.x2 = 50;
+		gfx.y1 = 50;
+		gfx.y2 = 50;
 
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawAND(gfxInfo);
+		andGate = new AND(output, gfx, 0);
+		andGate->SetLabel("AndTest");
+	}
 
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawAND(gfxInfo, true);
+	virtual void TearDown()
+	{
+		delete appManager;
+		delete output;
+		delete andGate;
+	}
+};
 
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 300;
-	pOut->DrawAND3(gfxInfo);
 
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 400;
-	pOut->DrawAND3(gfxInfo, true);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawNAND(gfxInfo);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawNAND(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	// 2. OR & NOR Gates test
-	pOut->PrintMsg("Drawing OR & NOR gates, normal and highlighted. Click to continue");
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawOR(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawOR(gfxInfo, true);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 300;
-	pOut->DrawNOR(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 400;
-	pOut->DrawNOR(gfxInfo, true);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawNOR3(gfxInfo);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawNOR3(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	// 3. XOR & XNOR Gates test
-	pOut->PrintMsg("Drawing XOR & XNOR gates, normal and highlighted. Click to continue");
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawXOR(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawXOR(gfxInfo, true);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 300;
-	pOut->DrawXNOR(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 400;
-	pOut->DrawXNOR(gfxInfo, true);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawXOR3(gfxInfo);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawXOR3(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	// 4. Buffer & Inverter Gates test
-	pOut->PrintMsg("Drawing Buffer & Inverter gates, normal and highlighted. Click to continue");
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawBuffer(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawBuffer(gfxInfo, true);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawNOT(gfxInfo);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawNOT(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	// 5. Switch & LED test 
-	pOut->PrintMsg("Drawing Switch & LED, normal and highlighted. Click to continue");
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawSwitch(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawSwitch(gfxInfo, true);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	pOut->DrawLED(gfxInfo);
-
-	gfxInfo.x1 = 400;	gfxInfo.y1 = UI.GateBarHeight + 200;
-	pOut->DrawLED(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	// 6. Connections
-	pOut->PrintMsg("Drawing connections, normal, highlighted, straight, and broken. Click to continue");
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	gfxInfo.x2 = 400;	gfxInfo.y2 = UI.GateBarHeight + 100;
-	//pOut->DrawConnection(gfxInfo);
-
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 400;
-	gfxInfo.x2 = 400;	gfxInfo.y2 = UI.GateBarHeight + 400;
-	//pOut->DrawConnection(gfxInfo, true);
-
-	gfxInfo.x1 = 800;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	gfxInfo.x2 = 1100;	gfxInfo.y2 = UI.GateBarHeight + 300;
-	//pOut->DrawConnection(gfxInfo);
-
-	gfxInfo.x1 = 800;	gfxInfo.y1 = UI.GateBarHeight + 400;
-	gfxInfo.x2 = 1100;	gfxInfo.y2 = UI.GateBarHeight + 600;
-	//pOut->DrawConnection(gfxInfo, true);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	////////////////////////////////////////////////////////////////////////////////////////
-	// TEST 3: Read strings from the user
-	////////////////////////////////////////////////////////////////////////////////////////
-	pOut->PrintMsg("TEST3: Now time to test the Input class. Click anywhere to continue");
-	pIn->GetPointClicked(x, y);
-
-	pOut->PrintMsg("Testing Input ability to read strings");
-	pIn->GetPointClicked(x, y);
-
-	//TODO: Add code here to 
-	// 1- Read a string from the user on the status bar and print it inside the drawing area
-	pOut->ClearStatusBar();
-	gfxInfo.x1 = 100;	gfxInfo.y1 = UI.GateBarHeight + 100;
-	string s = pIn->GetSrting(pOut);
-	pOut->DrawLabel(gfxInfo, s);
-
-	pIn->GetPointClicked(x, y);
-	pOut->ClearDrawingArea();
-
-	////////////////////////////////////////////////////////////////////////////////////////
-	// TEST 4: Check for the user actions
-	////////////////////////////////////////////////////////////////////////////////////////
-	pOut->PrintMsg("TEST4: Testing Input ability to detect User Action. click anywhere to continue");
-
-	ActionType ActType;
-
-	do {
-		ActType = pIn->GetUserAction();
-
-		switch (ActType)
-		{
-		case ADD_GATE_AND:
-			pOut->PrintMsg("AND");
-			break;
-		case ADD_GATE_NAND:
-			pOut->PrintMsg("NAND");
-			break;
-		case ADD_GATE_AND3:
-			pOut->PrintMsg("AND 3");
-			break;
-		case ADD_GATE_OR:
-			pOut->PrintMsg("OR");
-			break;
-		case ADD_GATE_NOR:
-			pOut->PrintMsg("NOR");
-			break;
-		case ADD_GATE_NOR3:
-			pOut->PrintMsg("NOR 3");
-			break;
-		case ADD_GATE_XOR:
-			pOut->PrintMsg("XOR");
-			break;
-		case ADD_GATE_XNOR:
-			pOut->PrintMsg("XNOR");
-			break;
-		case ADD_GATE_XOR3:
-			pOut->PrintMsg("XOR 3");
-			break;
-		case ADD_GATE_BUFFER:
-			pOut->PrintMsg("BUFFER");
-			break;
-		case ADD_GATE_NOT:
-			pOut->PrintMsg("NOT");
-			break;
-		case ADD_CONNECTION:
-			pOut->PrintMsg("CONNECTION");
-			break;
-		case ADD_SWITCH:
-			pOut->PrintMsg("SWITCH");
-			break;
-		case ADD_LED:
-			pOut->PrintMsg("LED");
-			break;
-		case EDIT:
-			pOut->PrintMsg("EDIT");
-			break;
-		case DEL:
-			pOut->PrintMsg("DELETE");
-			break;
-		case COPY:
-			pOut->PrintMsg("COPY");
-			break;
-		case CUT:
-			pOut->PrintMsg("CUT");
-			break;
-		case PASTE:
-			pOut->PrintMsg("PASTE");
-			break;
-		case UNDO:
-			pOut->PrintMsg("UNDO");
-			break;
-		case REDO:
-			pOut->PrintMsg("REDO");
-			break;
-		case SIMULATION_MODE:
-			pOut->PrintMsg("SIMULATION MODE");
-			UI.AppMode = Mode::SIMULATION;
-			pOut->CreateSimulationToolBar();
-			pOut->CreateSimulationGateBar();
-			break;
-		case DESIGN_MODE:
-			pOut->PrintMsg("DESIGN MODE");
-			UI.AppMode = Mode::DESIGN;
-			pOut->CreateDesignToolBar();
-			pOut->CreateDesignGateBar();
-			break;
-		case CREATE_TRUTH_TABLE:
-			pOut->PrintMsg("TRUTH TABLE");
-			break;
-		case SAVE:
-			pOut->PrintMsg("SAVE");
-			break;
-		case LOAD:
-			pOut->PrintMsg("LOAD");
-			break;
-		case EXIT:
-			pOut->PrintMsg("EXIT");
-			break;
-		case TOOL_BAR:
-			pOut->PrintMsg("TOOL BAR");
-			break;
-		case GATE_BAR:
-			pOut->PrintMsg("GATE BAR");
-			break;
-		case SELECT:
-			pOut->PrintMsg("DRAWING AREA");
-			break;
-		case STATUS_BAR:
-			pOut->PrintMsg("STATUS BAR");
-			break;
-		}
-
-	} while (ActType != EXIT);
-
-	pIn->GetPointClicked(x, y);
-
-	// Exiting the demo
-	pOut->PrintMsg("Test is finished. Click anywhere to exit");
-
-	delete pIn;
-	delete pOut;
-	return 0;
+bool compareColors(color c1, color c2){
+	if (c1.ucBlue == c2.ucBlue && c1.ucGreen == c2.ucGreen && c1.ucRed == c2.ucRed)
+		return true;
+	return false;
 }
-*/
+TEST(OutputTest, TestOutputConstructor){
+	Output* o = new Output();
+
+	EXPECT_TRUE(UI.AppMode == Mode::DESIGN);
+
+	EXPECT_TRUE(compareColors(UI.BackgroundColor, color(117, 117, 117)));
+	EXPECT_TRUE(compareColors(UI.DarkColor, color(66, 66, 66)));
+	EXPECT_TRUE(compareColors(UI.SelectionColor, color(255, 193, 7)));
+	EXPECT_TRUE(compareColors(UI.InvalidColor, color(213, 0, 0)));
+	EXPECT_TRUE(compareColors(UI.MsgColor, WHITE));
+	EXPECT_TRUE(compareColors(UI.ConnectionColor, BLACK));
+	EXPECT_TRUE(compareColors(UI.ConnectionOnColor, color(139, 195, 74)));
+
+	EXPECT_TRUE(o->GetCurrentWindow() != NULL);
+}
+//
+TEST(OutputTest, TestCreateInput){
+	Output *out = new Output();
+	ASSERT_TRUE(out->CreateInput() != NULL);
+}
+//
+TEST(TestActions, TestAddConnection){
+	ApplicationManager apm;
+	window *w = apm.GetOutput()->GetCurrentWindow();
+	GraphicsInfo g1;
+	g1.x1 = 15;
+	g1.y1 = UI.GateBarHeight + UI.ToolBarHeight + 15;
+	g1.x2 = 15 + UI.PinOffset;
+	g1.y2 = UI.GateBarHeight + UI.ToolBarHeight + 15 + UI.PinOffset;
+
+	GraphicsInfo g2;
+	g2.x1 = 30;
+	g2.y1 = UI.GateBarHeight + UI.ToolBarHeight + 30;
+	g2.x2 = 30 + UI.PinOffset;
+	g2.y2 = UI.GateBarHeight + UI.ToolBarHeight + 30 + UI.PinOffset;
+
+
+	Data *dm = new Data();
+	dm->GfxInfo = g1;
+	dm->Label = "test";
+	Component *c1 = new AND(apm.GetOutput(), g1, 1);
+	Component *c2 = new AND(apm.GetOutput(), g2, 1);
+	apm.AddComponent(c1);
+	apm.AddComponent(c2);
+	Action *a = new AddConnection(&apm, NULL);
+	EXPECT_TRUE(a != NULL);
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
+	w->SetUserClick(30, 30 + UI.GateBarHeight + UI.ToolBarHeight);
+	EXPECT_TRUE(a->ReadActionParameters());
+
+	Component **clist = apm.GetComponentList();
+	clist[0]->Delete(apm.GetOutput());
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
+	EXPECT_FALSE(a->ReadActionParameters());
+	clist[1]->Delete(apm.GetOutput());
+
+	EXPECT_FALSE(a->ReadActionParameters());
+
+	Action *b = new AddConnection(&apm, dm);
+	EXPECT_TRUE(b != NULL);
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
+	w->SetUserClick(30, 30 + UI.GateBarHeight + UI.ToolBarHeight);
+	EXPECT_FALSE(b->ReadActionParameters());
+	int tx, ty;
+	w->WaitMouseClick(tx, ty);
+	w->WaitMouseClick(tx, ty);
+
+	///////////////////////////////
+	c1 = new AND(apm.GetOutput(), g1, 1);
+	c2 = new AND(apm.GetOutput(), g2, 1);
+	apm.AddComponent(c1);
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
+	EXPECT_FALSE(a->Execute());
+
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
+	w->SetUserClick(30, 30 + UI.GateBarHeight + UI.ToolBarHeight);
+	apm.AddComponent(c2);
+	EXPECT_TRUE(a->Execute());
+}
+
+
+TEST_F(AndGateTest, CheckingPinsCoordinates)
+{
+	int xCoord, yCoord;
+
+	andGate->GetInputPinCoordinates(xCoord, yCoord, 0);
+	EXPECT_EQ(42, xCoord);
+	EXPECT_EQ(58, yCoord);
+
+	andGate->GetInputPinCoordinates(xCoord, yCoord, 1);
+	EXPECT_EQ(42, xCoord);
+	EXPECT_EQ(90, yCoord);
+}
+
+TEST_F(AndGateTest, NoInputsOperation)
+{
+	//when nothing is connected to the and gate's
+	//input pins, output pin should be low by default
+	andGate->Operate();
+	EXPECT_EQ(Status::LOW, andGate->GetOutputPinStatus());
+}
+
+TEST_F(AndGateTest, LowInputsOperation)
+{
+	andGate->GetInputPin(0)->SetStatus(Status::LOW);
+	andGate->GetInputPin(1)->SetStatus(Status::LOW);
+
+	andGate->Operate();
+	EXPECT_EQ(Status::LOW, andGate->GetOutputPinStatus());
+}
+
+TEST(ApplicationManagerTest, TestAddComponent){
+	ApplicationManager appman;
+	GraphicsInfo g(2, 3, 4, 5);
+
+	Component *c = new AND(appman.GetOutput(), g, 1);
+	Component **clist;
+	int x = appman.GetExistingComponentsCount();
+	appman.AddComponent(c);
+
+	ASSERT_TRUE(x + 1 == appman.GetExistingComponentsCount());
+	ASSERT_TRUE(appman.GetComponentList()[0] == c);
+}
+//
+TEST(ApplicationManagerTest, TestGetExistingComponentsCount){
+	ApplicationManager a;
+	GraphicsInfo g(2, 3, 4, 5);
+
+	Component *c = new AND(a.GetOutput(), g, 1);
+	Component **clist;
+	a.AddComponent(c);
+
+	clist = a.GetComponentList();
+	clist[0]->Delete(a.GetOutput());
+	ASSERT_EQ(a.GetExistingComponentsCount(), 0);
+}
+
+int main(int argc, char **argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
