@@ -9,7 +9,7 @@ Move::Move(ApplicationManager* pAppMan) : Action(pAppMan) {
 bool Move::ReadActionParameters() {
 	Output* pOut = mAppManager->GetOutput();
 	Input* pIn = mAppManager->GetInput();
-
+	
 	pIn->GetLastPointClicked(mStartX, mStartY);
 	normalizeCoordinates(mStartX, mStartY);
 
@@ -46,7 +46,7 @@ bool Move::Execute() {
 	int minY = UI.ToolBarHeight + UI.GateBarHeight;
 	int maxY = UI.Height - UI.StatusBarHeight;
 
-	// Store the previous window
+	// Store the previous window	
 	image wind;
 	pOut->StoreImage(wind, 0, 0, UI.Width, UI.Height);
 

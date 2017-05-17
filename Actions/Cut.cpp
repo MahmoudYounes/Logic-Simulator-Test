@@ -14,7 +14,9 @@ bool Cut::ReadActionParameters() {
 	mAppManager->UpdateInterface();
 
 	pOut->PrintMsg("Please select a component to cut");
-	pIn->WaitMouseClick(mX, mY);
+	// pIn->WaitMouseClick(mX, mY);
+	mX = 150;
+	mY = 150;
 	pOut->ClearStatusBar();
 
 	mComp = pOut->GetComponentAtPin(mX, mY);

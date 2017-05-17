@@ -37,6 +37,7 @@ bool AddGate::ReadActionParameters() {
 		image wind;
 		pOut->StoreImage(wind, 0, 0, UI.Width, UI.Height);
 
+		
 		// Reading the mouse input from the user
 		while (pIn->GetButtonState(LEFT_BUTTON, mX, mY) == BUTTON_UP) {
 			normalizeCoordinates(mX, mY);
@@ -62,10 +63,10 @@ bool AddGate::ReadActionParameters() {
 
 		// Wait until the user release the mouse click
 		pIn->WaitMouseClick(prvX, prvY);
-
+		
 		// Redraw the initial window
-		pOut->DrawImage(wind, 0, 0, UI.Width, UI.Height);
-		pOut->UpdateScreen();
+		// pOut->DrawImage(wind, 0, 0, UI.Width, UI.Height);
+		// pOut->UpdateScreen();
 	}
 	
 	CalculateDimensions();

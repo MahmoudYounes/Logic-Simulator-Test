@@ -24,6 +24,7 @@ bool Edit::ReadActionParameters() {
 
 	pOut->PrintMsg("Please select a component to edit");
 	pIn->WaitMouseClick(mX, mY);
+
 	pOut->ClearStatusBar();
 
 	if (!pOut->IsDrawingArea(mX, mY)) {
