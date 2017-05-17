@@ -587,6 +587,7 @@ TEST(OutputTest, TestDrawSwitch){
 // testing Actions
 TEST(TestActions, TestAddConnection){
 	ApplicationManager apm;
+	window *w = apm.GetOutput()->GetCurrentWindow();
 	GraphicsInfo g1;
 	g1.x1 = 15;
 	g1.y1 = UI.GateBarHeight + UI.ToolBarHeight + 15;
@@ -609,14 +610,15 @@ TEST(TestActions, TestAddConnection){
 	apm.AddComponent(c2);
 	Action *a = new AddConnection(&apm, NULL);
 	EXPECT_TRUE(a != NULL);
+	w->SetUserClick(15, UI.GateBarHeight + UI.ToolBarHeight + 15);
 	EXPECT_TRUE(a->ReadActionParameters());
 	
 	Component **clist = apm.GetComponentList();
-	delete clist[0];
-	delete c1;
+	clist[0]->Delete(apm.GetOutput());
+
 	EXPECT_FALSE(a->ReadActionParameters());
-	delete clist[1];
-	delete c2;
+	clist[1]->Delete(apm.GetOutput());
+	
 	EXPECT_FALSE(a->ReadActionParameters());
 
 	Action *b = new AddConnection(&apm, dm);
@@ -633,174 +635,177 @@ TEST(TestActions, TestAddConnection){
 	EXPECT_TRUE(a->Execute());
 }
 
-TEST(TestActions, TestAddGate){
-	ApplicationManager apm;
-	GraphicsInfo g1;
-	g1.x1 = 15;
-	g1.y1 = UI.GateBarHeight + UI.ToolBarHeight + 15;
-	g1.x2 = 15 + UI.PinOffset;
-	g1.y2 = UI.GateBarHeight + UI.ToolBarHeight + 15 + UI.PinOffset;
-
-	GraphicsInfo g2;
-	g2.x1 = 30;
-	g2.y1 = UI.GateBarHeight + UI.ToolBarHeight + 30;
-	g2.x2 = 30 + UI.PinOffset;
-	g2.y2 = UI.GateBarHeight + UI.ToolBarHeight + 30 + UI.PinOffset;
-
-	Data *dm = new Data();
-	dm->GfxInfo = g1;
-	dm->Label = "test";
-	Component *c1 = new AND(apm.GetOutput(), g1, 1);
-	Component *c2 = new AND(apm.GetOutput(), g2, 1);
-	apm.AddComponent(c1);
-	apm.AddComponent(c2);
-	// should try various action types.
-	// error in actiontype can be undo given the gate
-	Action *a = new AddGate(&apm, ActionType::ADD_GATE_AND);
-	EXPECT_TRUE(a != NULL);
-	EXPECT_TRUE(a->ReadActionParameters());
-
-	Component **clist = apm.GetComponentList();
-	delete clist[0];
-	delete c1;
-	EXPECT_FALSE(a->ReadActionParameters());
-	delete clist[1];
-	delete c2;
-	EXPECT_FALSE(a->ReadActionParameters());
-
-	Action *b = new AddConnection(&apm, dm);
-	EXPECT_TRUE(b != NULL);
-	EXPECT_TRUE(b->ReadActionParameters());
-
-
-	delete a;
-	a = new AddGate(&apm, ActionType::EXIT);
-	EXPECT_TRUE(a != NULL);
-	EXPECT_TRUE(a->ReadActionParameters());
-
-	delete clist[0];
-	delete c1;
-	EXPECT_FALSE(a->ReadActionParameters());
-	delete clist[1];
-	delete c2;
-	EXPECT_FALSE(a->ReadActionParameters());
-
-	delete b;
-	b = new AddConnection(&apm, dm);
-	EXPECT_TRUE(b != NULL);
-	EXPECT_TRUE(b->ReadActionParameters());
-
-	///////////////////////////////
-	c1 = new AND(apm.GetOutput(), g1, 1);
-	c2 = new AND(apm.GetOutput(), g2, 1);
-	
-	EXPECT_TRUE(a->Execute());
-	apm.AddComponent(c1);
-	EXPECT_FALSE(a->Execute());
-
-	apm.AddComponent(c2);
-	EXPECT_TRUE(a->Execute());
-}
-
-TEST(TestActions, TestCopy){
-	ApplicationManager apm;
-	Action *a = new Copy(&apm);
-
-	EXPECT_FALSE(a->ReadActionParameters());
-	EXPECT_FALSE(a->Execute());
-	
-	GraphicsInfo gfx1, gfx2;
-	gfx1.x1 = 150;
-	gfx1.y1 = 150;
-	gfx1.x2 = 150 + UI.PinOffset;
-	gfx1.y2 = 150 + UI.PinOffset;
-	vector<GraphicsInfo> gfxvec;
-	gfxvec.push_back(gfx1);
-	gfxvec.push_back(gfx2);
-	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
-	apm.AddComponent(c);
-	EXPECT_FALSE(a->ReadActionParameters());
-	EXPECT_FALSE(a->Execute());
-
-	c->Delete(apm.GetOutput());
-	delete c;
-	c = new AND(apm.GetOutput(), gfx1, 1);
-	apm.AddComponent(c);
-	EXPECT_TRUE(a->ReadActionParameters());
-	EXPECT_TRUE(a->Execute());
-}
-
-TEST(TestActions, TestCut){
-	ApplicationManager apm;
-	Action *a = new Cut(&apm);
-	EXPECT_FALSE(a->ReadActionParameters());
-	EXPECT_FALSE(a->Execute());
-
-	GraphicsInfo gfx1, gfx2;
-	gfx1.x1 = 150;
-	gfx1.y1 = 150;
-	gfx1.x2 = 150 + UI.PinOffset;
-	gfx1.y2 = 150 + UI.PinOffset;
-	vector<GraphicsInfo> gfxvec;
-	gfxvec.push_back(gfx1);
-	gfxvec.push_back(gfx2);
-	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
-	apm.AddComponent(c);
-	EXPECT_FALSE(a->ReadActionParameters());
-	EXPECT_FALSE(a->Execute());
-
-	c->Delete(apm.GetOutput());
-	delete c;
-	c = new AND(apm.GetOutput(), gfx1, 1);
-	apm.AddComponent(c);
-	EXPECT_TRUE(a->ReadActionParameters());
-	EXPECT_TRUE(a->Execute());
-}
-
-TEST(TestActions, TestDelete){
-	ApplicationManager apm;
-	Action *a = new Delete(&apm);
-
-	GraphicsInfo gfx1, gfx2;
-	gfx1.x1 = 150;
-	gfx1.y1 = 150;
-	gfx1.x2 = 150 + UI.PinOffset;
-	gfx1.y2 = 150 + UI.PinOffset;
-	vector<GraphicsInfo> gfxvec;
-	gfxvec.push_back(gfx1);
-	gfxvec.push_back(gfx2);
-	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
-	c->SetSelected(true);
-	EXPECT_FALSE(a->ReadActionParameters());
-	EXPECT_FALSE(a->Execute());
-
-	apm.AddComponent(c);
-	EXPECT_TRUE(a->ReadActionParameters());
-	EXPECT_TRUE(a->Execute());
-}
-
-TEST(TestActions, TestEdit){
-	ApplicationManager apm;
-	GraphicsInfo gfx1, gfx2;
-	gfx1.x1 = 150;
-	gfx1.y1 = 150;
-	gfx1.x2 = 150 + UI.PinOffset;
-	gfx1.y2 = 150 + UI.PinOffset;
-	vector<GraphicsInfo> gfxvec;
-	gfxvec.push_back(gfx1);
-	gfxvec.push_back(gfx2);
-	Component *c = new AND(apm.GetOutput(), gfx1, 1);
-	apm.AddComponent(c);
-	Action *a = new Edit(&apm);
-	
-	cout << "required mouse positions:\n1) not a drawing area\n2)not on a component\n3)on the component.\n";
-	EXPECT_FALSE(a->Execute());
-	EXPECT_FALSE(a->Execute());
-	EXPECT_TRUE(a->Execute());
-
-	cout << "good\n now expecting you press the connection.";
-	delete c;
-	c = new Connection(apm.GetOutput(), gfx1, gfxvec);
-	apm.AddComponent(c);
-	EXPECT_TRUE(a->Execute());
-}
+//TEST(TestActions, TestAddGate){
+//	ApplicationManager apm;
+//	GraphicsInfo g1;
+//	g1.x1 = 15;
+//	g1.y1 = UI.GateBarHeight + UI.ToolBarHeight + 15;
+//	g1.x2 = 15 + UI.PinOffset;
+//	g1.y2 = UI.GateBarHeight + UI.ToolBarHeight + 15 + UI.PinOffset;
+//
+//	GraphicsInfo g2;
+//	g2.x1 = 30;
+//	g2.y1 = UI.GateBarHeight + UI.ToolBarHeight + 30;
+//	g2.x2 = 30 + UI.PinOffset;
+//	g2.y2 = UI.GateBarHeight + UI.ToolBarHeight + 30 + UI.PinOffset;
+//
+//	Data *dm = new Data();
+//	dm->GfxInfo = g1;
+//	dm->Label = "test";
+//	Component *c1 = new AND(apm.GetOutput(), g1, 1);
+//	Component *c2 = new AND(apm.GetOutput(), g2, 1);
+//	apm.AddComponent(c1);
+//	apm.AddComponent(c2);
+//	// should try various action types.
+//	// error in actiontype can be undo given the gate
+//	Action *a = new AddGate(&apm, ActionType::ADD_GATE_AND);
+//	EXPECT_TRUE(a != NULL);
+//	EXPECT_TRUE(a->ReadActionParameters());
+//
+//	Component **clist = apm.GetComponentList();
+//	clist[0]->Delete(apm.GetOutput());
+//
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	clist[1]->Delete(apm.GetOutput());
+//
+//	EXPECT_FALSE(a->ReadActionParameters());
+//
+//	Action *b = new AddConnection(&apm, dm);
+//	EXPECT_TRUE(b != NULL);
+//	EXPECT_TRUE(b->ReadActionParameters());
+//
+//	
+//	delete a;
+//	a = new AddGate(&apm, ActionType::EXIT);
+//	EXPECT_TRUE(a != NULL);
+//	EXPECT_TRUE(a->ReadActionParameters());
+//
+//	clist[0]->Delete(apm.GetOutput());
+//
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	clist[1]->Delete(apm.GetOutput());
+//
+//	EXPECT_FALSE(a->ReadActionParameters());
+//
+//	delete b;
+//	b = new AddConnection(&apm, dm);
+//	EXPECT_TRUE(b != NULL);
+//	EXPECT_TRUE(b->ReadActionParameters());
+//
+//	///////////////////////////////
+//	c1 = new AND(apm.GetOutput(), g1, 1);
+//	c2 = new AND(apm.GetOutput(), g2, 1);
+//	
+//	EXPECT_TRUE(a->Execute());
+//	apm.AddComponent(c1);
+//	EXPECT_FALSE(a->Execute());
+//
+//	apm.AddComponent(c2);
+//	EXPECT_TRUE(a->Execute());
+//}
+//
+//TEST(TestActions, TestCopy){
+//	ApplicationManager apm;
+//	Action *a = new Copy(&apm);
+//
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	EXPECT_FALSE(a->Execute());
+//	
+//	GraphicsInfo gfx1, gfx2;
+//	gfx1.x1 = 150;
+//	gfx1.y1 = 150;
+//	gfx1.x2 = 150 + UI.PinOffset;
+//	gfx1.y2 = 150 + UI.PinOffset;
+//	vector<GraphicsInfo> gfxvec;
+//	gfxvec.push_back(gfx1);
+//	gfxvec.push_back(gfx2);
+//	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
+//	apm.AddComponent(c);
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	EXPECT_FALSE(a->Execute());
+//
+//	c->Delete(apm.GetOutput());
+//	c = new AND(apm.GetOutput(), gfx1, 1);
+//	apm.AddComponent(c);
+//	EXPECT_TRUE(a->ReadActionParameters());
+//	EXPECT_TRUE(a->Execute());
+//}
+//
+//TEST(TestActions, TestCut){
+//	ApplicationManager apm;
+//	Action *a = new Cut(&apm);
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	EXPECT_FALSE(a->Execute());
+//
+//	GraphicsInfo gfx1, gfx2;
+//	gfx1.x1 = 150;
+//	gfx1.y1 = 150;
+//	gfx1.x2 = 150 + UI.PinOffset;
+//	gfx1.y2 = 150 + UI.PinOffset;
+//	vector<GraphicsInfo> gfxvec;
+//	gfxvec.push_back(gfx1);
+//	gfxvec.push_back(gfx2);
+//	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
+//	apm.AddComponent(c);
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	EXPECT_FALSE(a->Execute());
+//
+//	c->Delete(apm.GetOutput());
+//
+//	c = new AND(apm.GetOutput(), gfx1, 1);
+//	apm.AddComponent(c);
+//	EXPECT_TRUE(a->ReadActionParameters());
+//	EXPECT_TRUE(a->Execute());
+//}
+//
+//
+//TEST(TestActions, TestDelete){
+//	ApplicationManager apm;
+//	Action *a = new Delete(&apm);
+//
+//	GraphicsInfo gfx1, gfx2;
+//	gfx1.x1 = 150;
+//	gfx1.y1 = 150;
+//	gfx1.x2 = 150 + UI.PinOffset;
+//	gfx1.y2 = 150 + UI.PinOffset;
+//	vector<GraphicsInfo> gfxvec;
+//	gfxvec.push_back(gfx1);
+//	gfxvec.push_back(gfx2);
+//	Component *c = new Connection(apm.GetOutput(), gfx1, gfxvec);
+//	c->SetSelected(true);
+//	EXPECT_FALSE(a->ReadActionParameters());
+//	EXPECT_FALSE(a->Execute());
+//
+//	apm.AddComponent(c);
+//	EXPECT_TRUE(a->ReadActionParameters());
+//	EXPECT_TRUE(a->Execute());
+//}
+//
+//TEST(TestActions, TestEdit){
+//	ApplicationManager apm;
+//	GraphicsInfo gfx1, gfx2;
+//	gfx1.x1 = 150;
+//	gfx1.y1 = 150;
+//	gfx1.x2 = 150 + UI.PinOffset;
+//	gfx1.y2 = 150 + UI.PinOffset;
+//	vector<GraphicsInfo> gfxvec;
+//	gfxvec.push_back(gfx1);
+//	gfxvec.push_back(gfx2);
+//	Component *c = new AND(apm.GetOutput(), gfx1, 1);
+//	apm.AddComponent(c);
+//	Action *a = new Edit(&apm);
+//	
+//	apm.GetOutput()->GetCurrentWindow()->SetUserClick(0, 0);
+//	EXPECT_FALSE(a->Execute());
+//	apm.GetOutput()->GetCurrentWindow()->SetUserClick(100, 100);
+//	EXPECT_FALSE(a->Execute());
+//	apm.GetOutput()->GetCurrentWindow()->SetUserClick(155, 155);
+//	EXPECT_TRUE(a->Execute());
+//
+//	c = new Connection(apm.GetOutput(), gfx1, gfxvec);
+//	apm.AddComponent(c);
+//	apm.GetOutput()->GetCurrentWindow()->SetUserClick(150, 150);
+//	EXPECT_TRUE(a->Execute());
+//}
+//
+//
